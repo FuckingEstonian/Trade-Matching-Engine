@@ -29,7 +29,7 @@ namespace ENG
 		return last_nod;
 	}
 
-	std::string Engine::Get_Identifier(std::string Input)
+	std::string Engine::Get_Identifier(const std::string& Input)
 	{
 		std::string Identifier;
 		short iterator(0);
@@ -41,7 +41,7 @@ namespace ENG
 		}
 		return Identifier;
 	}
-	std::string Engine::Get_Side(std::string Input)
+	std::string Engine::Get_Side(const std::string& Input)
 	{
 		std::string Side;
 		short iterator(0);
@@ -51,10 +51,15 @@ namespace ENG
 			iterator++;
 		}
 		Side = Input[iterator+1];
+
+		if (Side == "b") Side = "B";
+		if (Side == "s") Side = "S";
+		if (Side != "B" && Side != "S")
+			throw std::exception("Wrong enter (Side must be 'B' or 'S')");
 		
 		return Side;
 	}
-	int Engine::Get_Quantity(std::string Input)
+	int Engine::Get_Quantity(const std::string& Input)
 	{
 		int Quantity(0);
 		std::string S_Quantity;
@@ -70,14 +75,18 @@ namespace ENG
 		while (Input[iterator] != ' ')
 		{
 			S_Quantity += Input[iterator];
+			if (S_Quantity == "-")
+				throw std::exception("Wrong enter (Quantity can't be negative)\n");
 			iterator++;
 		}
 
 		Quantity = stoi(S_Quantity);
+		if (Quantity == 0)
+			throw std::exception("Wrong enter (Quantity can't be 0)\n");
 
 		return Quantity;
 	}
-	int Engine::Get_Price(std::string Input)
+	int Engine::Get_Price(const std::string & Input)
 	{
 		int Price(0);
 		std::string S_Price;
@@ -93,14 +102,43 @@ namespace ENG
 		while (Input[iterator])
 		{
 			S_Price += Input[iterator];
+			if (S_Price == "-")
+				throw std::exception("Wrong enter (Price can't be negative)\n");
 			iterator++;
 		}
 
 		Price = stoi(S_Price);
+		if (Price == 0)
+			throw std::exception("Wrong enter (Price can't be 0)\n");
 
 		return Price;
 	}
+	void Engine::Input_Check(const std::string& Input)
+	{
+		size_t correct_space_number(3); /// size_t
+		size_t min_char_number(7);
 
+		size_t iterator(0);
+		size_t real_space_number(0);
+
+		if (Input.size() < min_char_number)
+			throw std::exception("Wrong enter(not enough symbols in row)\n");
+		if (Input[iterator] == ' ')
+			throw std::exception("Wrong enter(row can't start from 'space')\n");
+
+		while (iterator <= Input.size())
+		{
+			if (Input[iterator] == ' ' &&
+				iterator != Input.size() )real_space_number++;
+			iterator++;
+		}
+
+		if (real_space_number != correct_space_number)
+		{
+			throw std::exception("Wrong enter (number of wor must be 4)\n");
+		}
+
+	}
 
 	void Engine::Add_Trader()
 	{
@@ -116,16 +154,27 @@ namespace ENG
 	void Engine::Add_Data_For_Trader(Trade_Data& Trader)
 	{
 		std::string Input;
-		std::cout << "Enter string: ";
-		std::getline(std::cin, Input);
+		bool check_trigger(false);
+		while (check_trigger != true)
+		{
+			std::cout << "Enter string: ";
+			try
+			{
+				std::getline(std::cin, Input);
 
-		//write function for check
+				Engine::Input_Check(Input);
 
-		Trader.Trader_Identifier = Get_Identifier(Input);
-		Trader.Side = Get_Side(Input);
-		Trader.Quatntity = Get_Quantity(Input);
-		Trader.Price = Get_Price(Input);
-		//////////////
+				Trader.Trader_Identifier = Get_Identifier(Input);
+				Trader.Side = Get_Side(Input);
+				Trader.Quatntity = Get_Quantity(Input);
+				Trader.Price = Get_Price(Input);
+				check_trigger = true;
+			}
+			catch(std::exception & input_excep)
+			{
+				std::cout << input_excep.what() << std::endl;
+			}	
+		}
 	}
 
 	void Engine::Memory_cleaner()

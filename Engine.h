@@ -1,6 +1,7 @@
 #pragma once
 #include"Trade_Data.h"
 #include <string>
+#include <exception>
 namespace ENG
 { 
 	class Engine
@@ -11,10 +12,11 @@ namespace ENG
 
 		Trade_Data* Get_last_nod();
 
-		std::string Get_Identifier(std::string);
-		std::string Get_Side(std::string);
-		int Get_Quantity(std::string);
-		int Get_Price(std::string);
+		std::string Get_Identifier(const std::string &);
+		std::string Get_Side(const std::string &);
+		int Get_Quantity(const std::string &);
+		int Get_Price(const std::string &);
+		void Input_Check(const std::string &);
 
 	public:
 
