@@ -5,9 +5,12 @@
 int main()
 {
 	ENG::Engine Aggressor;
+	/*
 	Aggressor.Add_Trader();
 	Aggressor.Add_Trader();
 	Aggressor.Print();
-	Aggressor.Memory_cleaner();
+	Aggressor.Memory_cleaner();*/
+	Aggressor.Menu();
+	
 }
 

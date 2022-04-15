@@ -18,15 +18,19 @@ namespace ENG
 		int Get_Price(const std::string &);
 		void Input_Check(const std::string &);
 
+
+
 	public:
+
+		void Menu();
 
 		void Print();  // test
 
-		void Add_Trader();
+		void Add_Trader(std::string& );
 
 		void Memory_cleaner(); // must be private
 
-		void Add_Data_For_Trader(Trade_Data&);
+		void Add_Data_For_Trader(Trade_Data&, std::string&);
 
 	};
 }

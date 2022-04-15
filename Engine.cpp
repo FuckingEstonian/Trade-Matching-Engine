@@ -6,14 +6,15 @@ namespace ENG
 		Trade_Data* Pointer = &Data;
 		while (Pointer != NULL)
 		{
-			std::cout << "Name : " << Pointer->Trader_Identifier << std::endl;
-			std::cout << "Operation : " << Pointer->Side << std::endl;
-			std::cout << "Quantity : " << Pointer->Quatntity << std::endl;
-			std::cout << "Price : " << Pointer->Price << std::endl;
-			std::cout << "Number : " << Pointer->Number_in_list << std::endl;
-			if (Pointer->next == NULL) std::cout << "Next NULL" << std::endl;
-			if (Pointer->prev == NULL) std::cout << "Prev NULL" << std::endl;
-			std::cout << "++++++++++++++++++++++++++++++++" << std::endl;
+
+			std::cout << "¹ " << Pointer->Number_in_list << "\t";
+			std::cout << Pointer->Trader_Identifier << " ";
+			std::cout << Pointer->Side << " ";
+			std::cout << Pointer->Quatntity << " ";
+			std::cout << Pointer->Price << "\n";
+			//if (Pointer->next == NULL) std::cout << "Next NULL" << std::endl;
+			//if (Pointer->prev == NULL) std::cout << "Prev NULL" << std::endl;
+			//std::cout << "++++++++++++++++++++++++++++++++" << std::endl;
 			Pointer = Pointer->next;
 		}
 	}
@@ -140,27 +141,27 @@ namespace ENG
 
 	}
 
-	void Engine::Add_Trader()
+	void Engine::Add_Trader(std::string& Input)
 	{
 		Trade_Data* Last_nod = Get_last_nod();
 		Trade_Data* New_nod = new Trade_Data ((Last_nod->Number_in_list)+1);
 		
-		Add_Data_For_Trader(*New_nod);
+		Add_Data_For_Trader(*New_nod, Input);
 
 		Last_nod->next = New_nod;
 		New_nod->prev = Last_nod;
 	}
 
-	void Engine::Add_Data_For_Trader(Trade_Data& Trader)
+	void Engine::Add_Data_For_Trader(Trade_Data& Trader, std::string& Input)
 	{
-		std::string Input;
+		//std::string Input_Safe = "Nothing";
 		bool check_trigger(false);
 		while (check_trigger != true)
 		{
-			std::cout << "Enter string: ";
+			if(Input == "nothing")std::cout << "Enter string: ";
 			try
 			{
-				std::getline(std::cin, Input);
+				if (Input == "nothing")std::getline(std::cin, Input);
 
 				Engine::Input_Check(Input);
 
@@ -173,8 +174,31 @@ namespace ENG
 			catch(std::exception & input_excep)
 			{
 				std::cout << input_excep.what() << std::endl;
+				Input = "nothing";
 			}	
 		}
+	}
+
+	void Engine::Menu()
+	{
+		std::cout << "Welcome to Trade Matching Engine\n\n";
+		std::cout << "Enter your order in next way '<Trader Identifier> <Side> <Quantity> <Price>'\n";
+		std::cout << "To stop input type 'end'\n";
+		std::cout << "Enter string: ";
+
+		std::string Input = "nothing";
+		std::getline(std::cin, Input);
+		Engine::Add_Data_For_Trader(Data, Input);
+		
+		while (Input != "end")
+		{
+			Engine::Print();
+			std::cout << "Enter string: ";
+			std::getline(std::cin, Input);
+			if (Input == "end")break;
+			Engine::Add_Trader(Input);
+		}
+		Engine::Memory_cleaner();
 	}
 
 	void Engine::Memory_cleaner()
