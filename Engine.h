@@ -11,13 +11,14 @@ namespace ENG
 		Trade_Data Data;
 
 		Trade_Data* Get_last_nod();
+		Trade_Data* Execute_nod(Trade_Data&);
 
 		std::string Get_Identifier(const std::string &);
 		std::string Get_Side(const std::string &);
 		int Get_Quantity(const std::string &);
 		int Get_Price(const std::string &);
 		void Input_Check(const std::string &);
-
+		void Combine_Similar_Traders();
 
 
 	public:

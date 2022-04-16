@@ -29,6 +29,18 @@ namespace ENG
 		}
 		return last_nod;
 	}
+	Trade_Data* Engine::Execute_nod(Trade_Data& Nod)
+	{
+		Trade_Data* temp_next = Nod.next;
+		Trade_Data* temp_prev = Nod.prev;
+
+		temp_next->prev = temp_prev;
+		temp_prev->next = temp_next;
+
+		delete &Nod;
+		return temp_prev;
+	}
+
 
 	std::string Engine::Get_Identifier(const std::string& Input)
 	{
@@ -178,6 +190,29 @@ namespace ENG
 			}	
 		}
 	}
+	void Engine::Combine_Similar_Traders()
+	{
+		Trade_Data* Offers = & Data;
+		while (Offers != NULL)
+		{
+			Trade_Data* temp = Offers->next;
+			while (temp != NULL)
+			{
+				if (Offers->Trader_Identifier == temp->Trader_Identifier &&
+					Offers->Side == temp->Side &&
+					Offers->Price == temp->Price)
+				{
+					Offers->Quatntity += temp->Quatntity;
+					temp = Engine::Execute_nod(*temp);
+				}
+
+				temp = temp->next;
+			}
+
+			Offers = Offers->next;
+		}
+	}
+
 
 	void Engine::Menu()
 	{
@@ -198,6 +233,9 @@ namespace ENG
 			if (Input == "end")break;
 			Engine::Add_Trader(Input);
 		}
+		Engine::Combine_Similar_Traders();
+		std::cout << "\nNew\n";
+		Engine::Print();
 		Engine::Memory_cleaner();
 	}
 
