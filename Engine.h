@@ -13,25 +13,31 @@ namespace ENG
 		Trade_Data* Get_last_nod();
 		Trade_Data* Execute_nod(Trade_Data&);
 
+
 		std::string Get_Identifier(const std::string &);
 		std::string Get_Side(const std::string &);
 		int Get_Quantity(const std::string &);
 		int Get_Price(const std::string &);
 		void Input_Check(const std::string &);
-		void Combine_Similar_Traders();
+		Trade_Data* Get_best_offer(const std::string&, Trade_Data*);
 
+		Trade_Data* Try_to_Buy(Trade_Data*);
+		
 
 	public:
 
 		void Menu();
 
-		void Print();  // test
+		void Print();  
 
 		void Add_Trader(std::string& );
 
-		void Memory_cleaner(); // must be private
-
 		void Add_Data_For_Trader(Trade_Data&, std::string&);
 
+		void Combine_Similar_Traders(); // in case if you want to compress list of orders;
+
+		void Match_orders();
+
+		void Memory_cleaner(); 
 	};
 }

@@ -31,10 +31,17 @@ namespace ENG
 	}
 	Trade_Data* Engine::Execute_nod(Trade_Data& Nod)
 	{
+		Trade_Data* temp = &Nod;
+		if (temp == &Data)
+		{
+			Data.Quatntity = 0;
+			Data.Price = 10000;
+			return temp;
+		}
 		Trade_Data* temp_next = Nod.next;
 		Trade_Data* temp_prev = Nod.prev;
 
-		temp_next->prev = temp_prev;
+		if(temp_next != NULL) temp_next->prev = temp_prev;
 		temp_prev->next = temp_next;
 
 		delete &Nod;
@@ -212,7 +219,82 @@ namespace ENG
 			Offers = Offers->next;
 		}
 	}
+	Trade_Data* Engine::Get_best_offer(const std::string& Side, Trade_Data* Order)
+	{
+		Trade_Data* temp_order = Order->prev;
+		Trade_Data* best_offer = Order;
+		while (temp_order != NULL)
+		{
+			if (Side == "B" && temp_order->Side != Side && temp_order->Price <= best_offer->Price)
+			{
+				best_offer = temp_order;
+			}
+			if (Side == "S" && temp_order->Side != Side && temp_order->Price >= best_offer->Price)
+			{
+				best_offer = temp_order;
+			}
+			temp_order = temp_order->prev;
+		}
+		if (best_offer == Order) best_offer = NULL;
+		return best_offer;
+	}
 
+	Trade_Data* Engine::Try_to_Buy(Trade_Data* Order)
+	{
+		Trade_Data* best_ofer = Engine::Get_best_offer(Order->Side, Order);
+		if (best_ofer == NULL) return Order;
+		
+		if (best_ofer->Quatntity > Order->Quatntity)
+		{
+			std::cout << Order->Trader_Identifier << "+" <<
+				Order->Quatntity << "@" << best_ofer->Price << "\t";
+			std::cout << best_ofer->Trader_Identifier << "-" <<
+				Order->Quatntity << "@" << best_ofer->Price << std::endl;
+
+			best_ofer->Quatntity -= Order->Quatntity;
+			return Engine::Execute_nod(*Order);
+		}
+		
+		if (best_ofer->Quatntity == Order->Quatntity)
+		{
+			std::cout << Order->Trader_Identifier << "+" <<
+				Order->Quatntity << "@" << best_ofer->Price << "\t";
+			std::cout << best_ofer->Trader_Identifier << "-" <<
+				Order->Quatntity << "@" << best_ofer->Price << std::endl;
+
+			Engine::Execute_nod(*best_ofer);
+			return Engine::Execute_nod(*Order);
+		}
+
+		if (best_ofer->Quatntity < Order->Quatntity)
+		{
+			std::cout << Order->Trader_Identifier << "+" <<
+				best_ofer->Quatntity << "@" << best_ofer->Price << "\t";
+			std::cout << best_ofer->Trader_Identifier << "-" <<
+				best_ofer->Quatntity << "@" << best_ofer->Price << std::endl;
+
+			Order->Quatntity -= best_ofer->Quatntity;
+			Engine::Execute_nod(*best_ofer);
+			return Engine::Try_to_Buy(Order);
+		}
+
+
+	}
+
+	void Engine::Match_orders()
+	{
+		Trade_Data* Order = &Data;
+		if (Data.next == NULL || Data.Side == "No" )
+		{
+			std::cout << "Nothing to match, or first order is empty!\n";
+			return;
+		}
+		while (Order != NULL)
+		{
+			Order = Engine::Try_to_Buy(Order);
+			if(Order != NULL)Order = Order->next;
+		}
+	}
 
 	void Engine::Menu()
 	{
@@ -233,7 +315,7 @@ namespace ENG
 			if (Input == "end")break;
 			Engine::Add_Trader(Input);
 		}
-		Engine::Combine_Similar_Traders();
+		Engine::Match_orders();
 		std::cout << "\nNew\n";
 		Engine::Print();
 		Engine::Memory_cleaner();

@@ -1,7 +1,12 @@
 Trade Matching Engine
  
 That engine matches client orders and reports trades.
-A trader places an order to buy or sell some quantity at a specific (or better) price. An order that enters the market is called Aggressor. Orders that exist in the market are called resting orders. The aggressor matches against resting orders of the opposite side with a best price first. If there are many resting orders at the best price then resting orders are taken from oldest to newest. Price of a matched trade is a price of a resting order. Aggressor matches against resting orders until all aggressor’s quantity is matched or the requested price no longer matches opposite orders. If there are no opposite orders with overlapping prices in the market then the aggressor rests until execution.
+A trader places an order to buy or sell some quantity at a specific (or better) price. An order that enters the market is called Aggressor. 
+Orders that exist in the market are called resting orders. The aggressor matches against resting orders of the opposite side with a best price first. 
+If there are many resting orders at the best price then resting orders are taken from oldest to newest. 
+Price of a matched trade is a price of a resting order. 
+Aggressor matches against resting orders until all aggressor’s quantity is matched or the requested price no longer matches opposite orders. 
+If there are no opposite orders with overlapping prices in the market then the aggressor rests until execution.
  
 It is a console application that reads input from stdin and writes results to stdout.
  
