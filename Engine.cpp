@@ -35,6 +35,7 @@ namespace ENG
 		if (temp == &Data)
 		{
 			Data.Quatntity = 0;
+			Data.Side = "No";
 			Data.Price = 10000;
 			return temp;
 		}
@@ -246,39 +247,72 @@ namespace ENG
 		
 		if (best_ofer->Quatntity > Order->Quatntity)
 		{
-			std::cout << Order->Trader_Identifier << "+" <<
-				Order->Quatntity << "@" << best_ofer->Price << "\t";
-			std::cout << best_ofer->Trader_Identifier << "-" <<
-				Order->Quatntity << "@" << best_ofer->Price << std::endl;
-
+			Engine::Print_trade(Order, best_ofer);
 			best_ofer->Quatntity -= Order->Quatntity;
 			return Engine::Execute_nod(*Order);
 		}
 		
 		if (best_ofer->Quatntity == Order->Quatntity)
 		{
-			std::cout << Order->Trader_Identifier << "+" <<
-				Order->Quatntity << "@" << best_ofer->Price << "\t";
-			std::cout << best_ofer->Trader_Identifier << "-" <<
-				Order->Quatntity << "@" << best_ofer->Price << std::endl;
-
+			Engine::Print_trade(Order, best_ofer);
 			Engine::Execute_nod(*best_ofer);
 			return Engine::Execute_nod(*Order);
 		}
 
 		if (best_ofer->Quatntity < Order->Quatntity)
 		{
-			std::cout << Order->Trader_Identifier << "+" <<
-				best_ofer->Quatntity << "@" << best_ofer->Price << "\t";
-			std::cout << best_ofer->Trader_Identifier << "-" <<
-				best_ofer->Quatntity << "@" << best_ofer->Price << std::endl;
-
+			Engine::Print_trade(Order, best_ofer);
 			Order->Quatntity -= best_ofer->Quatntity;
 			Engine::Execute_nod(*best_ofer);
 			return Engine::Try_to_Buy(Order);
 		}
+	}
+	bool Engine::Analyse_Market(Trade_Data* Order)
+	{
+		Trade_Data* temp_order = Order->prev;
+		int total_sellers(0);
+		int total_buyers(0);
+		int money_sell(0);
+		int money_buy(0);
 
+		while (temp_order != NULL)
+		{
+			if (temp_order->Side == "B" && temp_order->Quatntity != 0)
+			{
+				total_buyers += temp_order->Quatntity;
+				money_buy += (temp_order->Quatntity) * temp_order->Price;
+			}
+			if (temp_order->Side == "S" && temp_order->Quatntity != 0)
+			{
+				total_sellers += temp_order->Quatntity;
+				money_sell += (temp_order->Quatntity) * temp_order->Price;
+			}
+			temp_order = temp_order->prev;
+		}
 
+		if ((total_buyers <= 1 && Order->Side == "S") ||
+			(total_sellers <= 1 && Order->Side == "B"))
+		{
+			std::cout << Order->Number_in_list << "\tfalse\n";
+			return false;
+		}
+
+		int mutch_number = std::min (total_buyers, total_sellers);
+		int s_price(0), b_price(0);
+		if(total_sellers != 0) 
+			 s_price = (money_sell / total_sellers);
+		if(total_buyers != 0) 
+			b_price = (money_buy / total_buyers);
+		
+		if ((Order->Side == "B" && Order->Price > s_price) ||
+			(Order->Side == "S" && Order->Price < b_price))
+		{
+			std::cout << Order->Number_in_list << "\ttrue\t";
+			if (Order->Side == "B")std::cout << s_price << "\n";
+			if (Order->Side == "S")std::cout << b_price << "\n";
+			return true;
+		}
+		return false;
 	}
 
 	void Engine::Match_orders()
@@ -295,6 +329,23 @@ namespace ENG
 			if(Order != NULL)Order = Order->next;
 		}
 	}
+	void Engine::Print_trade(const Trade_Data* Order, const Trade_Data* best_ofer)
+	{
+		if (Order->Side == "B")
+		{
+			std::cout << Order->Trader_Identifier << "+" <<
+				std::min(best_ofer->Quatntity, Order->Quatntity)<< "@" << best_ofer->Price << "\t";
+			std::cout << best_ofer->Trader_Identifier << "-" <<
+				std::min(best_ofer->Quatntity, Order->Quatntity) << "@" << best_ofer->Price << std::endl;
+		}
+		if (Order->Side == "S")
+		{
+			std::cout << best_ofer->Trader_Identifier << "+" <<
+				std::min(best_ofer->Quatntity, Order->Quatntity) << "@" << best_ofer->Price << "\t";
+			std::cout << Order->Trader_Identifier << "-" <<
+				std::min(best_ofer->Quatntity, Order->Quatntity) << "@" << best_ofer->Price << std::endl;
+		}
+	}
 
 	void Engine::Menu()
 	{
@@ -307,17 +358,24 @@ namespace ENG
 		std::getline(std::cin, Input);
 		Engine::Add_Data_For_Trader(Data, Input);
 		
-		while (Input != "end")
-		{
+		do {
+			while (Input != "end")
+			{
+				//Engine::Print();
+				std::cout << "Enter string: ";
+				std::getline(std::cin, Input);
+				if (Input == "end")break;
+				Engine::Add_Trader(Input);
+			}
+			system("cls");
 			Engine::Print();
-			std::cout << "Enter string: ";
-			std::getline(std::cin, Input);
-			if (Input == "end")break;
-			Engine::Add_Trader(Input);
-		}
-		Engine::Match_orders();
-		std::cout << "\nNew\n";
-		Engine::Print();
+			std::cout << "\nMatched Orders:\n";
+			Engine::Match_orders();
+			std::cout << "\nResting Orders\n";
+			Engine::Print();
+			std::cout << "\nAdd more orders? (type 'yes' or 'no'): ";
+			std::cin >> Input;
+		} while (Input == "yes");
 		Engine::Memory_cleaner();
 	}
 

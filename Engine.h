@@ -20,6 +20,8 @@ namespace ENG
 		int Get_Price(const std::string &);
 		void Input_Check(const std::string &);
 		Trade_Data* Get_best_offer(const std::string&, Trade_Data*);
+		bool Analyse_Market(Trade_Data*);
+		void Print_trade(const Trade_Data*, const Trade_Data*);
 
 		Trade_Data* Try_to_Buy(Trade_Data*);
 		
