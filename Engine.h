@@ -13,7 +13,6 @@ namespace ENG
 		Trade_Data* Get_last_nod();
 		Trade_Data* Execute_nod(Trade_Data&);
 
-
 		std::string Get_Identifier(const std::string &);
 		std::string Get_Side(const std::string &);
 		int Get_Quantity(const std::string &);
@@ -23,7 +22,7 @@ namespace ENG
 		bool Analyse_Market(Trade_Data*);
 		void Print_trade(const Trade_Data*, const Trade_Data*);
 
-		Trade_Data* Try_to_Buy(Trade_Data*);
+		Trade_Data* Try_to_Buy(Trade_Data*, int, Output_Data*);
 		
 
 	public:

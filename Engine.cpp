@@ -49,7 +49,6 @@ namespace ENG
 		return temp_prev;
 	}
 
-
 	std::string Engine::Get_Identifier(const std::string& Input)
 	{
 		std::string Identifier;
@@ -160,6 +159,53 @@ namespace ENG
 		}
 
 	}
+	bool Engine::Analyse_Market(Trade_Data* Order)
+	{
+		Trade_Data* temp_order = Order->prev;
+		int total_sellers(0);
+		int total_buyers(0);
+		int money_sell(0);
+		int money_buy(0);
+
+		while (temp_order != NULL)
+		{
+			if (temp_order->Side == "B" && temp_order->Quatntity != 0)
+			{
+				total_buyers += temp_order->Quatntity;
+				money_buy += (temp_order->Quatntity) * temp_order->Price;
+			}
+			if (temp_order->Side == "S" && temp_order->Quatntity != 0)
+			{
+				total_sellers += temp_order->Quatntity;
+				money_sell += (temp_order->Quatntity) * temp_order->Price;
+			}
+			temp_order = temp_order->prev;
+		}
+
+		if ((total_buyers <= 1 && Order->Side == "S") ||
+			(total_sellers <= 1 && Order->Side == "B"))
+		{
+			std::cout << Order->Number_in_list << "\tfalse\n";
+			return false;
+		}
+
+		int mutch_number = std::min(total_buyers, total_sellers);
+		int s_price(0), b_price(0);
+		if (total_sellers != 0)
+			s_price = (money_sell / total_sellers);
+		if (total_buyers != 0)
+			b_price = (money_buy / total_buyers);
+
+		if ((Order->Side == "B" && Order->Price > s_price) ||
+			(Order->Side == "S" && Order->Price < b_price))
+		{
+			std::cout << Order->Number_in_list << "\ttrue\t";
+			if (Order->Side == "B")std::cout << s_price << "\n";
+			if (Order->Side == "S")std::cout << b_price << "\n";
+			return true;
+		}
+		return false;
+	}
 
 	void Engine::Add_Trader(std::string& Input)
 	{
@@ -182,7 +228,7 @@ namespace ENG
 			try
 			{
 				if (Input == "nothing")std::getline(std::cin, Input);
-
+				if (Input == "end")return;
 				Engine::Input_Check(Input);
 
 				Trader.Trader_Identifier = Get_Identifier(Input);
@@ -240,81 +286,51 @@ namespace ENG
 		return best_offer;
 	}
 
-	Trade_Data* Engine::Try_to_Buy(Trade_Data* Order)
+	Trade_Data* Engine::Try_to_Buy(Trade_Data* Order,
+		int recursion_depth = 0, Output_Data* Output = NULL)
 	{
+		
 		Trade_Data* best_ofer = Engine::Get_best_offer(Order->Side, Order);
 		if (best_ofer == NULL) return Order;
 		
+		if (Output == NULL) Output = new Output_Data;//
+		else Output = Output->Add_nod();
+		Output->Geet_Data_from_Traders(Order, best_ofer);//
+
 		if (best_ofer->Quatntity > Order->Quatntity)
 		{
-			Engine::Print_trade(Order, best_ofer);
+			if(recursion_depth == 0)//
+				Engine::Print_trade(Order, best_ofer);
 			best_ofer->Quatntity -= Order->Quatntity;
 			return Engine::Execute_nod(*Order);
 		}
 		
 		if (best_ofer->Quatntity == Order->Quatntity)
 		{
-			Engine::Print_trade(Order, best_ofer);
+			if(recursion_depth == 0)//
+				Engine::Print_trade(Order, best_ofer);
 			Engine::Execute_nod(*best_ofer);
 			return Engine::Execute_nod(*Order);
 		}
 
 		if (best_ofer->Quatntity < Order->Quatntity)
 		{
-			Engine::Print_trade(Order, best_ofer);
+
+			//Engine::Print_trade(Order, best_ofer);
 			Order->Quatntity -= best_ofer->Quatntity;
 			Engine::Execute_nod(*best_ofer);
-			return Engine::Try_to_Buy(Order);
+			Trade_Data* Output_pointer = Engine::Try_to_Buy(Order, recursion_depth+1, Output);
+			if (recursion_depth == 0)//
+			{
+				if (!Output->Analyse())
+					Output->Print();
+				else Output->Print_for_recursion();
+				Output->Clean_It();
+			}//
+			return Output_pointer;
 		}
 	}
-	bool Engine::Analyse_Market(Trade_Data* Order)
-	{
-		Trade_Data* temp_order = Order->prev;
-		int total_sellers(0);
-		int total_buyers(0);
-		int money_sell(0);
-		int money_buy(0);
-
-		while (temp_order != NULL)
-		{
-			if (temp_order->Side == "B" && temp_order->Quatntity != 0)
-			{
-				total_buyers += temp_order->Quatntity;
-				money_buy += (temp_order->Quatntity) * temp_order->Price;
-			}
-			if (temp_order->Side == "S" && temp_order->Quatntity != 0)
-			{
-				total_sellers += temp_order->Quatntity;
-				money_sell += (temp_order->Quatntity) * temp_order->Price;
-			}
-			temp_order = temp_order->prev;
-		}
-
-		if ((total_buyers <= 1 && Order->Side == "S") ||
-			(total_sellers <= 1 && Order->Side == "B"))
-		{
-			std::cout << Order->Number_in_list << "\tfalse\n";
-			return false;
-		}
-
-		int mutch_number = std::min (total_buyers, total_sellers);
-		int s_price(0), b_price(0);
-		if(total_sellers != 0) 
-			 s_price = (money_sell / total_sellers);
-		if(total_buyers != 0) 
-			b_price = (money_buy / total_buyers);
-		
-		if ((Order->Side == "B" && Order->Price > s_price) ||
-			(Order->Side == "S" && Order->Price < b_price))
-		{
-			std::cout << Order->Number_in_list << "\ttrue\t";
-			if (Order->Side == "B")std::cout << s_price << "\n";
-			if (Order->Side == "S")std::cout << b_price << "\n";
-			return true;
-		}
-		return false;
-	}
-
+	
 	void Engine::Match_orders()
 	{
 		Trade_Data* Order = &Data;
@@ -373,8 +389,9 @@ namespace ENG
 			Engine::Match_orders();
 			std::cout << "\nResting Orders\n";
 			Engine::Print();
+			Engine::Combine_Similar_Traders();
 			std::cout << "\nAdd more orders? (type 'yes' or 'no'): ";
-			std::cin >> Input;
+			std::getline(std::cin,Input);
 		} while (Input == "yes");
 		Engine::Memory_cleaner();
 	}
