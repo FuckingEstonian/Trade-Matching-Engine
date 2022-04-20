@@ -12,13 +12,9 @@ namespace ENG
 			std::cout << Pointer->Side << " ";
 			std::cout << Pointer->Quatntity << " ";
 			std::cout << Pointer->Price << "\n";
-			//if (Pointer->next == NULL) std::cout << "Next NULL" << std::endl;
-			//if (Pointer->prev == NULL) std::cout << "Prev NULL" << std::endl;
-			//std::cout << "++++++++++++++++++++++++++++++++" << std::endl;
 			Pointer = Pointer->next;
 		}
 	}
-
 
 	Trade_Data* Engine::Get_last_nod()
 	{
@@ -29,6 +25,7 @@ namespace ENG
 		}
 		return last_nod;
 	}
+
 	Trade_Data* Engine::Execute_nod(Trade_Data& Nod)
 	{
 		Trade_Data* temp = &Nod;
@@ -61,6 +58,7 @@ namespace ENG
 		}
 		return Identifier;
 	}
+
 	std::string Engine::Get_Side(const std::string& Input)
 	{
 		std::string Side;
@@ -79,6 +77,7 @@ namespace ENG
 		
 		return Side;
 	}
+
 	int Engine::Get_Quantity(const std::string& Input)
 	{
 		int Quantity(0);
@@ -106,6 +105,7 @@ namespace ENG
 
 		return Quantity;
 	}
+
 	int Engine::Get_Price(const std::string & Input)
 	{
 		int Price(0);
@@ -133,9 +133,10 @@ namespace ENG
 
 		return Price;
 	}
+
 	void Engine::Input_Check(const std::string& Input)
 	{
-		size_t correct_space_number(3); /// size_t
+		size_t correct_space_number(3); 
 		size_t min_char_number(7);
 
 		size_t iterator(0);
@@ -157,8 +158,8 @@ namespace ENG
 		{
 			throw std::exception("Wrong enter (number of wor must be 4)\n");
 		}
-
 	}
+
 	bool Engine::Analyse_Market(Trade_Data* Order)
 	{
 		Trade_Data* temp_order = Order->prev;
@@ -189,8 +190,8 @@ namespace ENG
 			return false;
 		}
 
-		int mutch_number = std::min(total_buyers, total_sellers);
-		int s_price(0), b_price(0);
+		unsigned int mutch_number = std::min(total_buyers, total_sellers);
+		unsigned int s_price(0), b_price(0);
 		if (total_sellers != 0)
 			s_price = (money_sell / total_sellers);
 		if (total_buyers != 0)
@@ -244,6 +245,7 @@ namespace ENG
 			}	
 		}
 	}
+
 	void Engine::Combine_Similar_Traders()
 	{
 		Trade_Data* Offers = & Data;
@@ -266,6 +268,7 @@ namespace ENG
 			Offers = Offers->next;
 		}
 	}
+
 	Trade_Data* Engine::Get_best_offer(const std::string& Side, Trade_Data* Order)
 	{
 		Trade_Data* temp_order = Order->prev;
@@ -289,7 +292,7 @@ namespace ENG
 	Trade_Data* Engine::Try_to_Buy(Trade_Data* Order,
 		int recursion_depth = 0, Output_Data* Output = NULL)
 	{
-		
+	
 		Trade_Data* best_ofer = Engine::Get_best_offer(Order->Side, Order);
 		if (best_ofer == NULL) return Order;
 		
@@ -345,6 +348,7 @@ namespace ENG
 			if(Order != NULL)Order = Order->next;
 		}
 	}
+
 	void Engine::Print_trade(const Trade_Data* Order, const Trade_Data* best_ofer)
 	{
 		if (Order->Side == "B")
@@ -365,7 +369,7 @@ namespace ENG
 
 	void Engine::Menu()
 	{
-		std::cout << "Welcome to Trade Matching Engine\n\n";
+		std::cout << "Welcome to Trade Matching Engine.\nPlease, leave a comment in my GitHub repositori:\nhttps://github.com/FuckingEstonian/Trade-Matching-Engine\nThank you!\n\n";
 		std::cout << "Enter your order in next way '<Trader Identifier> <Side> <Quantity> <Price>'\n";
 		std::cout << "To stop input type 'end'\n";
 		std::cout << "Enter string: ";
@@ -385,30 +389,35 @@ namespace ENG
 			}
 			system("cls");
 			Engine::Print();
+
 			std::cout << "\nMatched Orders:\n";
 			Engine::Match_orders();
+
 			std::cout << "\nResting Orders\n";
 			Engine::Print();
-			Engine::Combine_Similar_Traders();
+
+			//Engine::Combine_Similar_Traders();
 			std::cout << "\nAdd more orders? (type 'yes' or 'no'): ";
 			std::getline(std::cin,Input);
+
 		} while (Input == "yes");
+
 		Engine::Memory_cleaner();
 	}
 
 	void Engine::Memory_cleaner()
 	{
-		std::cout << "Cleaner started" << std::endl;
+		//std::cout << "Cleaner started" << std::endl;
 		Trade_Data* Dead_nod = Get_last_nod();
 		Trade_Data* temp;
 		while (Dead_nod->Number_in_list != 1)
 		{
 			temp = Dead_nod;
 			Dead_nod = Dead_nod->prev;
-			std::cout << temp->Number_in_list << std::endl;
+			//std::cout << temp->Number_in_list << std::endl;
 
 			delete temp;
 		}
-		std::cout << "Cleaner ended" << std::endl;
+		std::cout << "Memory cleaned!" << std::endl;
 	}
 }

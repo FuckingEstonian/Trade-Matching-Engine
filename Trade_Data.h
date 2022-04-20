@@ -28,6 +28,7 @@ public:
 	unsigned int Q1;
 	unsigned int Q2;
 	unsigned int Pr;
+	bool out_triger;
 
 	Output_Data* next;
 	Output_Data* prev;
@@ -35,7 +36,7 @@ public:
 	Output_Data(std::string Trader1 = "empty", std::string Trader2 = "empty", std::string Side = "No",
 		unsigned int QuanT1 = 0, unsigned int QuanT2 = 0, unsigned int Price = 0) :
 		T1(Trader1), T2(Trader2), Q1(QuanT1), Q2(QuanT2), Pr(Price),
-		Sid(Side), next(NULL), prev(NULL) {};
+		Sid(Side), out_triger(false), next(NULL), prev(NULL) {};
 	
 	Output_Data* Add_nod();
 	void Geet_Data_from_Traders(Trade_Data*, Trade_Data*);

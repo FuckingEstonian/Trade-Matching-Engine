@@ -57,6 +57,13 @@ bool Output_Data::Analyse()
 				pointer2 = pointer2->prev;
 				delete dead;
 			}
+			if (pointer2->T1 == pointer1->T1 && pointer2->Pr == pointer1->Pr &&
+				pointer2->Q1 != 0 && pointer1 != pointer2)
+			{
+				pointer1->Q1 = pointer2->Q2 + pointer1->Q2;
+				pointer1->out_triger = true;
+				pointer2->T1 = "empty";
+			}
 			pointer2 = pointer2->next;
 		}
 		pointer1 = pointer1->next;
@@ -90,18 +97,29 @@ void Output_Data::Print_for_recursion()
 	Output_Data* Output = this;
 	while (Output != NULL)
 	{
-		if (Output->Sid == "S")
-			std::cout << Output->T2 << "+" << Output->Q2 << "@" << Output->Pr << "\t";
+		if (Output->out_triger == true)
+		{
+			if (Output->Sid == "S" && Output->T1 != "empty")
+				std::cout << Output->T2 << "+" << Output->Q1 << "@" << Output->Pr << "\t";
+			if (Output->Sid == "B" && Output->T1 != "empty")
+				std::cout << Output->T1 << "+" << Output->Q1 << "@" << Output->Pr << "\t";
+			Output = Output->next;
+		}
 		else
+		{
+		if (Output->Sid == "S" && Output->T1 != "empty")
+			std::cout << Output->T2 << "+" << Output->Q2 << "@" << Output->Pr << "\t";
+		if (Output->Sid == "B" && Output->T1 != "empty")
 			std::cout << Output->T1 << "+" << Output->Q2 << "@" << Output->Pr << "\t";
 		Output = Output->next;
+		}
 	}
 	Output = this;
 	while (Output != NULL)
 	{
-		if (Output->Sid == "S")
+		if (Output->Sid == "S" )
 			std::cout << Output->T1 << "-" << Output->Q2 << "@" << Output->Pr << "\t";
-		else
+		if (Output->Sid == "B" )
 			std::cout << Output->T2 << "-" << Output->Q2 << "@" << Output->Pr << "\t";
 		Output = Output->next;
 	}
